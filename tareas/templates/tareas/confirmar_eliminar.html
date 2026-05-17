@@ -1,0 +1,42 @@
+{% extends 'tareas/base.html' %}
+
+{% block content %}
+
+<div class="detalle-card">
+
+    <div class="detalle-header-actions mb-4">
+        <a href="{% url 'crear_tarea' %}" class="btn btn-primary">
+            Nuevo
+        </a>
+
+        <a href="{% url 'lista_tareas' %}?vista=lista" class="btn btn-outline-primary">
+            Mis Tareas
+        </a>
+    </div>
+
+    <div class="confirmar-eliminar-box">
+
+        <h3>Eliminar tarea</h3>
+
+        <p>
+            ¿Desea eliminar la tarea:
+            <strong>"{{ tarea.titulo }}"</strong>?
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <button type="submit" class="btn btn-danger">
+                Confirmar
+            </button>
+
+            <a href="{% url 'detalle_tarea' tarea.id %}" class="btn btn-secondary">
+                Cancelar
+            </a>
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

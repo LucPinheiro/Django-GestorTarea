@@ -1,0 +1,71 @@
+<form method="post" id="tarea-form" class="odoo-form">
+    {% csrf_token %}
+
+    <div class="formulario-dos-columnas">
+
+        <!-- IZQUIERDA -->
+        <div class="formulario-izquierda">
+
+            <!-- TITULO -->
+            <div class="mb-4">
+
+                <h1 class="mb-3">
+                    {{ form.titulo }}
+                </h1>
+
+            </div>
+
+            <!-- DESCRIPCION -->
+            <div>
+
+                <h5 class="mb-3">
+                    Descripción
+                </h5>
+
+                {{ form.descripcion }}
+
+            </div>
+
+        </div>
+
+        <!-- DERECHA -->
+        <div class="formulario-derecha">
+
+            <!-- ESTADO -->
+            <div class="mb-4">
+
+                <label class="form-label text-muted">
+                    Estado
+                </label>
+
+                {{ form.estado }}
+
+            </div>
+
+            <!-- PRIORIDAD -->
+            <div class="mb-4">
+
+                <label class="form-label text-muted">
+                    Prioridad
+                </label>
+
+                {{ form.prioridad }}
+
+            </div>
+
+            <!-- FECHA -->
+            <div class="mb-2">
+
+                <label class="form-label text-muted">
+                    Fecha límite
+                </label>
+
+                {{ form.fecha_limite }}
+
+            </div>
+
+        </div>
+
+    </div>
+
+</form>

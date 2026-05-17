@@ -1,0 +1,438 @@
+{% extends 'tareas/base.html' %}
+
+{% block content %}
+
+<!-- Barra superior -->
+<div class="toolbar-superior">
+
+ <!-- IZQUIERDA -->
+<div class="toolbar-left">
+
+    <a href="{% url 'crear_tarea' %}"
+       class="btn btn-primary btn-nuevo">
+        Nuevo
+    </a>
+
+    <a href="{% url 'lista_tareas' %}?vista=lista&page={{ page }}&seleccion={{ tarea.id }}"
+       class="btn btn-link text-dark text-decoration-none p-0 titulo-tareas">
+
+        Mis tareas
+
+    </a>
+
+    <div class="dropdown">
+
+        <button class="btn btn-light btn-gear"
+                type="button"
+                data-bs-toggle="dropdown">
+
+            ⚙
+
+        </button>
+
+        <ul class="dropdown-menu shadow">
+
+            <li>
+                <a class="dropdown-item"
+                   href="{% url 'importar_csv' %}">
+                    ⬇ Importar registros
+                </a>
+            </li>
+
+            <li>
+                <button type="submit"
+                        form="form-eliminar-seleccionadas"
+                        formaction="{% url 'exportar_csv' %}"
+                        formmethod="post"
+                        class="dropdown-item border-0 bg-transparent w-100 text-start">
+
+                    ⬆ Exportar CSV
+
+                </button>
+            </li>
+
+        </ul>
+
+    </div>
+
+</div>
+
+    <!-- CENTRO -->
+   <form method="get" class="toolbar-filtros">
+
+        <input type="text"
+               name="buscar"
+               class="form-control buscador-input"
+               placeholder="Buscar..."
+               value="{{ busqueda|default:'' }}">
+
+        <select name="estado"
+                class="form-select estado-select">
+
+            <option value="">Todos</option>
+
+            <option value="Borrador"
+                {% if estado == "Borrador" %}selected{% endif %}>
+                Borrador
+            </option>
+
+            <option value="Pendiente"
+                {% if estado == "Pendiente" %}selected{% endif %}>
+                Pendiente
+            </option>
+
+            <option value="En proceso"
+                {% if estado == "En proceso" %}selected{% endif %}>
+                En proceso
+            </option>
+
+            <option value="Completada"
+                {% if estado == "Completada" %}selected{% endif %}>
+                Completada
+            </option>
+
+        </select>
+
+        <button class="btn btn-outline-secondary">
+            Filtrar
+        </button>
+
+    </form>
+
+    <!-- DERECHA -->
+    <div class="btn-group">
+
+        <a href="?vista=kanban"
+           class="btn btn-outline-info active">
+            ▦
+        </a>
+
+        <a href="?vista=lista"
+           class="btn btn-outline-secondary">
+            ☰
+        </a>
+
+    </div>
+
+</div>
+
+
+
+
+<!-- ============================= -->
+<!-- VISTA LISTA -->
+<!-- ============================= -->
+
+{% if vista == 'lista' %}
+
+
+<form method="post"
+      id="form-eliminar-seleccionadas"
+        action="{% url 'eliminar_tareas_seleccionadas' %}">
+    {% csrf_token %}
+
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+    <div></div>
+
+    <div class="d-flex align-items-center gap-3">
+
+       <div class="dropdown">
+
+    <button class="btn btn-outline-primary dropdown-toggle btn-acciones"
+            type="button"
+            data-bs-toggle="dropdown">
+        ⚙ Acciones
+    </button>
+
+    <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4 p-2">
+
+        <li>
+
+            <button type="button"
+                    class="dropdown-item text-danger"
+                    onclick="abrirModalEliminar()">
+                🗑 Eliminar
+            </button>
+        </li>
+
+    </ul>
+
+</div>
+
+    <div class="lista-paginador">
+
+    <span class="fw-semibold">
+        {{ posicion }} / {{ total }}
+    </span>
+
+    {% if tareas.has_previous %}
+        <a href="?page={{ tareas.previous_page_number }}&vista={{ vista }}"
+           class="btn btn-light border btn-sm">
+            ‹
+        </a>
+    {% else %}
+        <button class="btn btn-light border btn-sm" disabled>
+            ‹
+        </button>
+    {% endif %}
+
+    {% if tareas.has_next %}
+        <a href="?page={{ tareas.next_page_number }}&vista={{ vista }}"
+           class="btn btn-light border btn-sm">
+            ›
+        </a>
+    {% else %}
+        <button class="btn btn-light border btn-sm" disabled>
+            ›
+        </button>
+    {% endif %}
+
+</div>
+
+
+        <div class="modal fade" id="modalEliminarSeleccionadas" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+
+            <div class="modal-header modal-eliminar-header">
+                <h5 class="modal-title text-white">
+                    Eliminar tareas
+                </h5>
+            </div>
+
+            <div class="modal-body fs-5">
+                ¿Desea eliminar las tareas seleccionadas?
+            </div>
+
+            <div class="modal-footer border-0 pt-0">
+
+                    <button type="submit"
+                            form="form-eliminar-seleccionadas"
+                            class="btn btn-danger btn-modal-eliminar">
+                        Eliminar
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-secondary btn-modal-cancelar"
+                            data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+       
+
+    </div>
+
+</div>
+
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle mb-0">
+
+                <thead>
+                    <tr>
+                        <th style="width: 40px;">
+                            <input type="checkbox" id="checkTodos">
+                        </th>
+                        <th>Título</th>
+                        <th>Descripción</th>
+                        <th>Fecha</th>
+                        <th class="text-end">Estado</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for tarea in tareas %}
+                        
+                        <tr onclick="window.location='{% url 'detalle_tarea' tarea.id %}?vista=lista&page={{ tareas.number }}&seleccion={{ tarea.id }}'"
+                            {% if request.GET.seleccion == tarea.id|stringformat:"s" %}
+                                class="fila-activa"
+                            {% endif %}
+                        >
+
+
+                        <td onclick="event.stopPropagation()">
+                            <input type="checkbox"
+                                   name="tareas_seleccionadas"
+                                   value="{{ tarea.id }}"
+                                   class="check-tarea">
+                        </td>
+
+                      <td class="titulo-columna">
+                            {{ tarea.titulo }}
+                        </td>
+
+                        <td class="text-muted">
+                            {{ tarea.descripcion|truncatechars:80 }}
+                        </td>
+
+                        <td>
+                            {{ tarea.fecha_creada|date:"d/m/Y" }}
+                        </td>
+
+                        <td class="text-end">
+                            {% if tarea.estado == "Borrador" %}
+                                <span class="badge bg-secondary">Borrador</span>
+                            {% elif tarea.estado == "Pendiente" %}
+                                <span class="badge bg-warning text-dark">Pendiente</span>
+                            {% elif tarea.estado == "En proceso" %}
+                                <span class="badge bg-primary">En proceso</span>
+                            {% else %}
+                                <span class="badge bg-success">Completada</span>
+                            {% endif %}
+                        </td>
+
+
+                    </tr>
+
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">
+                            No hay tareas.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+
+        </div>
+    </div>
+
+</form>
+
+<script>
+    document.getElementById('checkTodos')?.addEventListener('change', function () {
+        document.querySelectorAll('.check-tarea').forEach(function (checkbox) {
+            checkbox.checked = event.target.checked;
+        });
+    });
+</script>
+
+
+
+<!-- ============================= -->
+<!-- VISTA KANBAN -->
+<!-- ============================= -->
+
+{% else %}
+
+<div class="row">
+
+    <!-- Borrador -->
+    <div class="col-lg-3 col-md-6 mb-4">
+
+        <h5 class="fw-bold">Borrador</h5>
+
+        <div class="kanban-line"></div>
+
+        {% for tarea in tareas_borrador %}
+            {% include 'tareas/tarjeta_tarea.html' %}
+        {% empty %}
+            <p class="text-muted small">Sin tareas</p>
+        {% endfor %}
+
+    </div>
+
+    <!-- Pendiente -->
+    <div class="col-lg-3 col-md-6 mb-4">
+
+        <h5 class="fw-bold">Pendiente</h5>
+
+        <div class="kanban-line"></div>
+
+        {% for tarea in tareas_pendientes %}
+            {% include 'tareas/tarjeta_tarea.html' %}
+        {% empty %}
+            <p class="text-muted small">Sin tareas</p>
+        {% endfor %}
+
+    </div>
+
+    <!-- En proceso -->
+    <div class="col-lg-3 col-md-6 mb-4">
+
+        <h5 class="fw-bold">En proceso</h5>
+
+        <div class="kanban-line"></div>
+
+        {% for tarea in tareas_proceso %}
+            {% include 'tareas/tarjeta_tarea.html' %}
+        {% empty %}
+            <p class="text-muted small">Sin tareas</p>
+        {% endfor %}
+
+    </div>
+
+    <!-- Completada -->
+    <div class="col-lg-3 col-md-6 mb-4">
+
+        <h5 class="fw-bold">Completada</h5>
+
+        <div class="kanban-line"></div>
+
+        {% for tarea in tareas_completadas %}
+            {% include 'tareas/tarjeta_tarea.html' %}
+        {% empty %}
+            <p class="text-muted small">Sin tareas</p>
+        {% endfor %}
+
+    </div>
+
+</div>
+
+{% endif %}
+
+<script>
+
+function abrirModalEliminar() {
+
+    const tareas = document.querySelectorAll('.check-tarea:checked');
+
+    if (tareas.length === 0) {
+
+        mostrarAviso();
+
+        return;
+    }
+
+    const modal = new bootstrap.Modal(
+        document.getElementById('modalEliminarSeleccionadas')
+    );
+
+    modal.show();
+}
+
+function mostrarAviso() {
+
+    const aviso = document.createElement('div');
+
+    aviso.className =
+        'alert alert-warning aviso-seleccion shadow-lg';
+
+    aviso.innerHTML = `
+        <div class="d-flex align-items-center gap-2">
+            <span>⚠</span>
+            <span>No hay tareas seleccionadas</span>
+        </div>
+    `;
+
+    document.body.appendChild(aviso);
+
+    setTimeout(() => {
+        aviso.remove();
+    }, 3000);
+}
+
+</script>
+
+{% endblock %}
+

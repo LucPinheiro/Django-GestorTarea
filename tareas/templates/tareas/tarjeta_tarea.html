@@ -1,0 +1,49 @@
+  
+        <div class="task-card card shadow-sm border-0 mb-3"
+     onclick="window.location='{% url 'detalle_tarea' tarea.id %}'">
+
+        <div class="card-body">
+
+                <!-- Título -->
+            <div class="mb-2">
+                    <h5 class="card-title fw-bold mb-1">
+                        {{ tarea.titulo }}
+                    </h5>
+
+                <div class="text-warning prioridad-estrellas">
+                    {% if tarea.prioridad == 1 %}
+                        ★☆☆
+                    {% elif tarea.prioridad == 2 %}
+                        ★★☆
+                    {% else %}
+                        ★★★
+                    {% endif %}
+                </div>
+            </div>
+
+        <!-- Descripción -->
+        <p class="card-text text-muted small mb-3">
+            {{ tarea.descripcion|truncatechars:80 }}
+        </p>
+
+        <!-- Fecha -->
+        <div class="d-flex justify-content-between align-items-center">
+
+            <small class="text-muted">
+                {{ tarea.fecha_creada|date:"d/m/Y" }}
+                
+            </small>
+
+            {% if tarea.fecha_limite %}
+                <small class="badge bg-danger-subtle text-danger border">
+                    ⏰ {{ tarea.fecha_limite|date:"d/m/Y" }}
+                </small>
+            {% endif %}
+
+        </div>
+ 
+        </div>
+
+
+
+    </div>

@@ -1,0 +1,243 @@
+{% extends 'tareas/base.html' %}
+
+{% block content %}
+
+<div class="card shadow-sm detalle-card">
+    <div class="card-body">
+
+        <div class="toolbar-header">
+
+            <a href="{% url 'crear_tarea' %}" class="btn btn-primary btn-nuevo">
+                Nuevo
+            </a>
+            
+            <a href="{% url 'lista_tareas' %}?vista=lista&page={{ page }}&seleccion={{ seleccion }}"
+            class="btn btn-light btn-volver-lista">
+                Mis Tareas
+            </a>
+            
+            <div class="dropdown">
+                <button class="btn btn-light btn-gear" type="button" data-bs-toggle="dropdown">
+                    ⚙
+                </button>
+
+             <ul class="dropdown-menu">
+
+                    <li>
+                        <a class="dropdown-item"
+                        href="{% url 'importar_csv' %}">
+                            ↧ Importar registros
+                        </a>
+                    </li>
+
+                    <li>
+                    <a class="dropdown-item"
+                    href="{% url 'exportar_csv' %}?tarea_id={{ tarea.id }}">
+                        ↥ Exportar CSV
+                    </a>
+                </li>
+
+
+                </ul>
+            </div>
+
+            {% if not modo_formulario %}
+                <a href="{% url 'editar_tarea' tarea.id %}"
+                   class="btn-editar-inline"
+                   title="Editar tarea">
+                    ✎
+                </a>
+           
+
+            <a href="{% url 'eliminar_tarea' tarea.id %}"
+            class="btn-icon-delete">
+                <i class="bi bi-trash"></i>
+            </a>
+
+             {% endif %}
+
+            {% if modo_formulario %}
+                <button type="submit"
+                        form="tarea-form"
+                        class="btn btn-primary btn-guardar-inline"
+                        title="Guardar manualmente">
+                    ☁
+                </button>
+
+                {% if tarea %}
+                    <a href="{% url 'detalle_tarea' tarea.id %}"
+                       class="btn btn-light btn-descartar-inline"
+                       title="Descartar cambios">
+                        ✖
+                    </a>
+                {% else %}
+                    <a href="{% url 'lista_tareas' %}"
+                       class="btn btn-light btn-descartar-inline"
+                       title="Descartar cambios">
+                        ✖
+                    </a>
+                {% endif %}
+            {% endif %}
+
+        </div>
+
+        {% if modo_formulario %}
+
+            <form method="post" id="tarea-form" class="formulario-tarea">
+                {% csrf_token %}
+
+                <div class="formulario-grid">
+
+                    <div>
+                        <h1>
+                        {% if tarea %}
+                            Editar
+                        {% else %}
+                            Nuevo
+                        {% endif %}
+                    </h1>
+
+                        <label>Título</label>
+                        {{ form.titulo }}
+
+                        <label>Descripción</label>
+                        {{ form.descripcion }}
+                    </div>
+
+                    <div class="panel-datos">
+                        <label>Estado</label>
+                        {{ form.estado }}
+
+                        <label>Prioridad</label>
+                        {{ form.prioridad }}
+
+                        <label>Fecha límite</label>
+                        {{ form.fecha_limite }}
+                    </div>
+
+                </div>
+
+            </form>
+
+        {% else %}
+
+        <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-4 detalle-header">
+
+                <div>
+                    <h2 class="mb-2">{{ tarea.titulo }}</h2>
+
+                    <p class="text-muted mb-0">
+                        Creada el {{ tarea.fecha_creada|date:"d/m/Y" }}
+                    </p>
+                </div>
+
+                <div class="d-flex align-items-start gap-5 flex-wrap detalle-meta">
+
+                    <div class="prioridad-estrellas">
+                        <a href="{% url 'cambiar_prioridad' tarea.id 1 %}">
+                            {% if tarea.prioridad >= 1 %}★{% else %}☆{% endif %}
+                        </a>
+                        <a href="{% url 'cambiar_prioridad' tarea.id 2 %}">
+                            {% if tarea.prioridad >= 2 %}★{% else %}☆{% endif %}
+                        </a>
+                        <a href="{% url 'cambiar_prioridad' tarea.id 3 %}">
+                            {% if tarea.prioridad >= 3 %}★{% else %}☆{% endif %}
+                        </a>
+                    </div>
+
+                    {% if tarea.fecha_limite %}
+                    <div>
+                        <small class="text-muted d-block mb-1">Fecha límite</small>
+                        <span class="badge bg-danger fs-6">{{ tarea.fecha_limite }}</span>
+                    </div>
+                    {% endif %}
+
+                    <div>
+                        <small class="text-muted d-block mb-1">Estado</small>
+
+                        <span class="badge fs-6
+                            {% if tarea.estado == 'Borrador' %}
+                                bg-secondary
+                            {% elif tarea.estado == 'Pendiente' %}
+                                bg-warning text-dark
+                            {% elif tarea.estado == 'En proceso' %}
+                                estado-proceso
+                            {% else %}
+                                bg-success
+                            {% endif %}
+                        ">
+                            {{ tarea.estado }}
+                        </span>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2 ms-auto detalle-paginador">
+
+                    <span class="fw-semibold">
+                        {{ posicion }} / {{ total }}
+                    </span>
+
+                    {% if anterior %}
+                        <a href="{% url 'detalle_tarea' anterior.id %}?vista={{ vista }}"
+                        class="btn btn-light border px-3">
+                            ‹
+                        </a>
+                    {% else %}
+                        <button class="btn btn-light border px-3" disabled>
+                            ‹
+                        </button>
+                    {% endif %}
+
+                    {% if siguiente %}
+                        <a href="{% url 'detalle_tarea' siguiente.id %}?vista={{ vista }}"
+                        class="btn btn-light border px-3">
+                            ›
+                        </a>
+                    {% else %}
+                        <button class="btn btn-light border px-3" disabled>
+                            ›
+                        </button>
+                    {% endif %}
+
+                </div>
+
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <div class="btn-group w-100 detalle-estados">
+
+                    <a href="{% url 'cambiar_estado_simple' tarea.id 'Borrador' %}"
+                       class="btn {% if tarea.estado == 'Borrador' %}btn-secondary{% else %}btn-outline-secondary{% endif %}">
+                        Borrador
+                    </a>
+
+                    <a href="{% url 'cambiar_estado_simple' tarea.id 'Pendiente' %}"
+                       class="btn {% if tarea.estado == 'Pendiente' %}btn-warning{% else %}btn-outline-secondary{% endif %}">
+                        Pendiente
+                    </a>
+
+                    <a href="{% url 'cambiar_estado_simple' tarea.id 'En proceso' %}"
+                       class="btn {% if tarea.estado == 'En proceso' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+                        En proceso
+                    </a>
+
+                    <a href="{% url 'cambiar_estado_simple' tarea.id 'Completada' %}"
+                       class="btn {% if tarea.estado == 'Completada' %}btn-success{% else %}btn-outline-secondary{% endif %}">
+                        Completada
+                    </a>
+
+                </div>
+            </div>
+
+            <h5>Descripción</h5>
+
+            <p class="fs-5 descripcion-texto">
+                {{ tarea.descripcion }}
+            </p>
+
+        {% endif %}
+
+    </div>
+</div>
+
+{% endblock %}
