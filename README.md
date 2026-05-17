@@ -59,8 +59,6 @@ El objetivo de esta aplicación es facilitar la organización y gestión de tare
 
 ## Estructura del proyecto
 
-## Estructura del proyecto
-
 ```bash
 gestor_tareas/
 │
