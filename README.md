@@ -318,3 +318,11 @@ fecha_limite
 - Bootstrap
 - Python
 - Mucho café ☕
+  ---
+
+## 📌 Información del proyecto
+
+**Versión:** 1.0  
+**Última actualización:** Mayo 2026
+
+---
